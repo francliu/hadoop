@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>local_test</resourceName>
+    <idePath>workflow/local</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.local_test.JobLauncher</jobLauncher>
+    <mapper>my.group.local_test.MyMapper</mapper>
+    <reducer>my.group.local_test.MyReducer</reducer>
+    <combiner>my.group.local_test.MyCombiner</combiner>
+
+
+    <!--task-->
+    <mapOutputKey>uid:string,mid:string,blogtime:string</mapOutputKey>
+    <mapOutputValue>blog:string,blog_len:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>weibo_blog_data_local_test</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_test_blog_content_feather</name>
+    </outputTable>
+</mapred>

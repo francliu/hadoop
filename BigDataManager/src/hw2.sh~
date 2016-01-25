@@ -1,0 +1,5 @@
+rm -f *.class *.jar
+javac 3_201428013229115_hw2.java
+jar cfm 3_201428013229115_hw2.jar 3_201428013229115_hw2-manifest.txt 3_201428013229115_hw2*.class
+hadoop jar ./3_201428013229115_hw2.jar /hw2/input_9 /hw2/outputpp
+hdfs dfs -cat '/hw2/outputpp/part-*'

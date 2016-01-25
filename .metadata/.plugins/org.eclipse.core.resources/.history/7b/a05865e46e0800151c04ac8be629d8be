@@ -1,0 +1,321 @@
+
+import Jama.Matrix;
+
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+	public static void CommunityEvolution(double a_t_1[][],double a_t[][],int size,double alpha,int k,int community_number){
+		
+		Matrix at_1=new Matrix(a_t_1);
+		Matrix at=new Matrix(a_t);
+		
+		int degree_1[]=new int[size];
+		//int degree[]=new int[size];
+		for (int i = 0; i < size; i++){
+			degree_1[i]=0;
+			//degree[i]=0;
+			for (int j = 0; j < size; j++)
+			{
+				if(a_t_1[i][j]!=0)
+					degree_1[i]++;
+				//degree[i] += a_t[i][j];
+			}
+		}
+		
+		Matrix dt_1=new Matrix(size, size, 0);
+		//Matrix dt=new Matrix(size, size, 0);
+		for (int i=0;i<size;i++)
+		{
+			
+			//dt_1.set(i,i,degree_1[i]);
+			dt_1.set(i,i,1/(Math.sqrt(degree_1[i])));
+			//dt.set(i, i,1/(Math.sqrt(degree[i])));
+		}
+		
+		
+		Matrix i=new Matrix(size,size,0);
+		for(int j=0;j<size;j++)
+			i.set(j, j, 1);
+		
+		Matrix lt_1=i.minus(dt_1.times(at_1).times(dt_1));
+
+		Matrix lt=at.times(alpha).plus(at_1.times(1-alpha));
+		
+		Matrix d=new Matrix(size, size, 0);
+		for (int j = 0; j < size; j++){
+			double t=0;
+			for (int n = 0; n < size; n++)
+			{
+				if(lt.get(j, n)!=0)
+					t++;
+			}
+			d.set(j,j,1/(Math.sqrt(t)));
+		}
+		
+		
+		Matrix l=i.minus(d.times(lt).times(d));
+		
+		Matrix xt=l.eig().getV();
+		
+		Matrix xt_1=lt_1.eig().getV();
+		
+		
+		double x[][]=new double[size][k];
+		
+		for(int j=0;j<size;j++)
+			for(int n=0;n<k;n++)
+				x[j][n]=xt.get(j, n);
+		for(int j=0;j<size;j++){
+			double t=0;
+			for(int n=0;n<k;n++)
+				t+=x[j][n]*x[j][n];
+			for(int n=0;n<k;n++)
+				x[j][n]=x[j][n]/Math.sqrt(t);
+		}
+		
+		System.out.println("Evolutionary Clustering:");
+		KMeans kmeans=new KMeans(x,k, size,community_number);
+		String result[]=kmeans.cluster();
+		
+		double x_1[][]=new double[size][k];
+		
+		for(int j=0;j<size;j++)
+			for(int n=0;n<k;n++)
+				x_1[j][n]=xt_1.get(j, n);
+		for(int j=0;j<size;j++){
+			double t=0;
+			for(int n=0;n<k;n++)
+				t+=x_1[j][n]*x_1[j][n];
+			for(int n=0;n<k;n++)
+				x_1[j][n]=x_1[j][n]/Math.sqrt(t);
+		}
+		
+		/*
+		System.out.println("Spectral Clustering:");
+		KMeans kmeans_1=new KMeans(x_1,k, size,community_number);
+		String result_1[]=kmeans_1.cluster();
+		*/
+		
+		writeTxtFile(result,"C://Users//wsx//Desktop//result.txt");
+		
+	}
+	
+	public static void CommunityEvaluation(){
+		
+		
+		try {
+
+			String encoding = "GBK";
+
+			File file1 = new File("C://Users//wsx//Desktop//result.txt");
+			File file2 = new File("C://Users//wsx//Desktop//groundtruth.txt");
+
+			if (file1.isFile() && file1.exists()&&file2.isFile() && file2.exists()) {
+
+				InputStreamReader read1 = new InputStreamReader(
+						new FileInputStream(file1), encoding);
+				InputStreamReader read2 = new InputStreamReader(
+						new FileInputStream(file2), encoding);
+				BufferedReader bufferedReader1 = new BufferedReader(read1);
+				BufferedReader bufferedReader2 = new BufferedReader(read2);
+				String lineTxt1 = null;
+				String lineTxt2 = null;
+				
+				ArrayList<String[]> s1=new ArrayList<String[]>();
+				ArrayList<String[]> s2=new ArrayList<String[]>();
+				while ((lineTxt1 = bufferedReader1.readLine()) != null ) {
+					//System.out.println(lineTxt);
+					String[] ss1=lineTxt1.trim().split(" ");
+					s1.add(ss1);
+				}
+				
+				while ((lineTxt2 = bufferedReader2.readLine()) != null) {
+					//System.out.println(lineTxt);
+					
+					String[] ss2=lineTxt2.trim().split(" ");
+					s2.add(ss2);
+				}
+				
+				int TP=0,FP=0,FN=0,TN=0;
+				
+				for(int i=0;i<s1.size();i++){
+					String[] ss=s1.get(i);
+					String[] ss1=new String[ss.length];
+					for(int j=0;j<ss.length;j++){
+						
+						for(int m=0;m<s2.size();m++){
+							String[] t=s2.get(m);
+							for(int n=0;n<t.length;n++)
+								if(t[n]==ss[j])
+									ss1[j]=m+"";
+						}
+						
+					}
+					
+					Map<String ,Integer> m=new HashMap<String,Integer>();
+					
+					for(int j=0;j<ss1.length;j++){
+						String sss=ss1[j];
+						Integer count=m.get(sss);
+						m.put(sss, count==null?1:count+1);
+					}
+					Set<String> set=m.keySet();
+					for(String str:set){
+						if(m.get(str)>1)
+							TP+=m.get(str)*2;
+					}
+					
+					Iterator<String> it1=set.iterator();
+					Iterator<String> it2=set.iterator();
+					while(it1.hasNext()){
+						String key=it1.next();
+						it2.next();
+						int t=m.get(key);
+						while(it2.hasNext())
+							FP+=t*m.get(it2.next());
+						
+					}	
+				}
+				
+				for(int i=0;i<s2.size();i++){
+					String ss[]=s2.get(i);
+					String ss1[]=new String[ss.length];
+					for(int j=0;j<ss.length;j++){
+						
+						for(int m=0;m<s1.size();m++){
+							String[] t=s1.get(m);
+							for(int n=0;n<t.length;n++)
+								if(t[n]==ss[j])
+									ss1[j]=m+"";
+						}
+						
+					}
+					
+					Map<String ,Integer> m=new HashMap<String,Integer>();
+					
+					for(int j=0;j<ss1.length;j++){
+						String sss=ss1[j];
+						Integer count=m.get(sss);
+						m.put(sss, count==null?1:count+1);
+					}
+					Set<String> set=m.keySet();
+					
+					Iterator<String> it1=set.iterator();
+					Iterator<String> it2=set.iterator();
+					while(it1.hasNext()){
+						String key=it1.next();
+						it2.next();
+						int t=m.get(key);
+						while(it2.hasNext())
+							FN+=t*m.get(it2.next());
+					}
+						
+				}
+				read1.close();
+				read2.close();
+				
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static double[][] readTxtFile(String filePath){
+		
+		int node;
+		
+		int edge;
+		
+		double a[][]=null;
+		
+		
+		try {
+
+			String encoding = "GBK";
+
+			File file = new File(filePath);
+
+			if (file.isFile() && file.exists()) {
+
+				InputStreamReader read = new InputStreamReader(
+						new FileInputStream(file), encoding);
+				BufferedReader bufferedReader = new BufferedReader(read);
+				String lineTxt = null;
+
+				String s=bufferedReader.readLine();
+					
+				String[] ss=s.trim().split(" ");
+				
+				node =Integer.valueOf(ss[0]).intValue();
+				
+				a=new double[node][node];
+				
+				
+				//System.out.println(node);
+				edge=Integer.valueOf(ss[1]).intValue();
+				//System.out.println(edge);
+				while ((lineTxt = bufferedReader.readLine()) != null) {
+					//System.out.println(lineTxt);
+					
+					String[] sss=lineTxt.trim().split(" ");
+					
+					
+					a[Integer.valueOf(sss[0]).intValue()][Integer.valueOf(sss[1]).intValue()]=1;
+					a[Integer.valueOf(sss[1]).intValue()][Integer.valueOf(sss[0]).intValue()]=1;
+				}
+				read.close();
+				
+			} else {
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return a;
+	}
+	
+	
+	public static void writeTxtFile(String result[],String filePath) {
+		
+		try {
+
+			File file = new File(filePath);
+
+			if (file.exists()) {
+
+				file.createNewFile();
+			}
+			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+			
+			for(int i=0;i<result.length;i++)
+			{
+				String s="";
+				
+				s=result[i]+"\n";
+				
+				//System.out.println(s);
+				bufferedWriter.write(s);
+			}
+			
+			
+			bufferedWriter.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+				
+		
+		double t_1[][]=readTxtFile("C://Users//wsx//Desktop//test.txt");
+		double t[][]=readTxtFile("C://Users//wsx//Desktop//test1.txt");
+		CommunityEvolution(t_1,t,t.length,0.5,2,10);
+		
+	}
+
+}

@@ -1,0 +1,334 @@
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.DecimalFormat;
+
+import Jama.Matrix;
+
+public class SimpleModularity2 {
+
+	public static DecimalFormat myformat = new DecimalFormat("#0");
+	public static DecimalFormat myformat2 = new DecimalFormat("#0.0000 ");
+	public static int nodesNum, edgesNum;
+	public static int computeKmeansTimes = 0;
+	// public static double[][] EV;//B������ֵ
+	public static double[] ED;// B����������
+	public static Boolean update = false;
+	public static int groupsNum = 3;//Ҫ�ֵ�����
+	public static Matrix B;
+
+	/**
+	 * @param args
+	 * @throws FileNotFoundException
+	 */
+	public static void print(double[][] A, int n1, int n2) {
+
+		for (int i = 0; i < n1; i++) {
+			for (int j = 0; j < n2; j++) {
+				System.out.print(myformat2.format(A[i][j]) + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static double[][] readFileToInitializeAdjacentArray(File file)
+			throws IOException {
+		double[][] A;
+		BufferedReader reader = null;
+		String tmpStr = null;
+		String[] strLine = null;
+
+		reader = new BufferedReader(new FileReader(file));
+
+		tmpStr = reader.readLine();
+		strLine = tmpStr.split(" ");
+		nodesNum = Integer.parseInt(strLine[0]);
+		int n = nodesNum;
+		edgesNum = Integer.parseInt(strLine[1]);
+		A = new double[n][n];// ��ʼ��Ĭ��ȫΪ0
+		ED = new double[n];
+		// EV = new double[n][n];
+		// print(A);
+
+		while ((tmpStr = reader.readLine()) != null) {
+			strLine = tmpStr.split(" |,");
+			int i = Integer.parseInt(strLine[0]);
+			int j = Integer.parseInt(strLine[1]);
+			//A[i - 1][j - 1] = 1;// ���data.txt
+			//A[j - 1][i - 1] = 1;
+			 A[i][j] = 1;//���test.txt
+			 A[j][i] = 1;
+		}
+		// print(A);
+		reader.close();
+		return A;
+	}
+
+	public static double[] computeDegree(double[][] A) {
+		int n = A[0].length;
+
+		double[] degree = new double[n];
+
+		int k = 0;
+		for (int i = 0; i < n; i++) {
+			double temSum = 0;
+
+			for (int j = 0; j < n; j++) {
+				temSum = temSum + A[i][j];
+			}
+			degree[k] = temSum;
+			k++;
+		}
+		System.out.print("���ڵ����Ϊ��");
+
+		for (int i = 0; i < n; i++) {
+			System.out.print(myformat.format(degree[i]) + " ");
+		}
+		System.out.println();
+		return degree;
+	}
+
+	public static double[] computeBMatrixEigenvalues(double[][] array) {
+		double[] degree = computeDegree(array);
+		Matrix d = new Matrix(degree, nodesNum);// ��������
+		Matrix Tmp;
+		// Tmp = d.arrayTimes(d.inverse());//�����
+		Tmp = d.times(d.transpose());// �����ת��Tmp=d*dT
+		Tmp = Tmp.times(1.0 / (2 * edgesNum));// Tmp = d*dT*1/(2*m)
+
+		Matrix A = new Matrix(array);// ����һ������
+		B = A.minus(Tmp);// B = A - 1/2m * d * dT
+		// B.print(5,2);
+		int n = array[0].length;
+
+		System.out.println("����ֵΪ��");
+		for (int i = 0; i < n; i++) {// ��ȡ����ֵ����ѡȡ��������ֵ
+			ED[i] = B.eig().getD().get(i, i);
+
+			System.out.print(myformat2.format(ED[i]) + " ");// ���ÿһ������ֵ
+			/*
+			 * for(int j =0;j<n;j++){ EV[i][j] = B.eig().getV().get(i,j); }
+			 */
+		}
+		System.out.println();
+
+		double[] maxEigenvector = new double[nodesNum];
+		for (int i = 0; i < n; i++) {// ֻ������һ������ֵ
+			// System.out.println(myformat2.format(EV[i][nodesNum-1]));
+			maxEigenvector[i] = B.eig().getV().get(i, nodesNum - 1);
+		}
+		// print(EV);
+
+		 System.out.println("��Ӧ�����������ǣ�");
+		 B.eig().getV().print(5, 2);
+
+		return maxEigenvector;
+
+	}
+
+	public static int[]  findSmallGroups(double[] maxEigenVector) {
+		update = false;
+
+		int n = nodesNum;
+		double[] tmp = maxEigenVector;
+		int[] nodesIndex = new int[n];
+		for (int i = 0; i < n; i++)
+			nodesIndex[i] = i + 1;
+		// for(int k =0;k<=4;k++){
+		int k = groupsNum;// �ֳ�k��
+
+		System.out.println();
+
+		double[] centers = new double[k];// k������ֵ
+		centers[0] = tmp[0];// ��ʼ������
+		centers[1] = tmp[1];
+		centers[2] = tmp[2];
+		//centers[3] = tmp[0];
+		//centers[4] = tmp[21];
+		//centers[5] = tmp[28];
+		//centers[6] = tmp[2];
+		//centers[7] = tmp[38];
+		//centers[8] = tmp[8];
+		//centers[9] = tmp[18];
+		
+		
+		
+		
+		
+		int[] tagArr = new int[nodesNum];
+		double[][] distance = new double[nodesNum][k];
+
+		computeKmeans(centers, tmp, tagArr, distance, k);
+
+		for (int i = 0; i < n; i++) {
+			System.out.print(tagArr[i] + " ");
+
+		}
+		System.out.println();
+
+		while (update == true) {// ֻҪ�и��� ��Ҫ���µ�����k-means
+			update = false;
+			// ��������ֵ
+		//	double center01 = 0;int center01Num = 0;
+		//	double center02 = 0;int center02Num = 0;
+		//	double center03 = 0;int center03Num = 0;
+			
+			double center = 0;int centerNum = 0;
+			int centersRow = 0;
+			int tag = 0;
+			while (centersRow < groupsNum) {
+				center = 0;
+				centerNum = 0;
+
+				for (int i = 0; i < nodesNum; i++) {// ͳ��n���ڵ���tagΪ0 1 2...�Ľڵ���
+					if (tagArr[i] == tag) {
+						center = center + tmp[i];
+						centerNum++;
+					}
+				}
+				centers[centersRow] = center / centerNum;
+				tag++;
+				centersRow++;
+			}
+			
+			
+			/*
+
+			for (int i = 0; i < n; i++) {
+				if (tagArr[i] == 0) {
+					center01 = center01 + tmp[i];
+					center01Num++;
+				} else if (tagArr[i] == 1) {
+					center02 = center02 + tmp[i];
+					center02Num++;
+				}else if(tagArr[i] == 2){
+					center03 = center03 + tmp[i];
+					center03Num++;
+				}
+			}
+			centers[0] = center01 / center01Num;
+			centers[1] = center02 / center02Num;
+			centers[2] = center03 / center03Num;
+*/
+			
+			
+			
+			computeKmeans(centers, tmp, tagArr, distance, k);
+			for (int i = 0; i < n; i++) {
+				System.out.print(tagArr[i] + " ");
+			}
+			System.out.println();
+		}
+		return tagArr;
+	}
+
+	public static int findMinDis(double[] d) {
+		int minIndex = 0;
+		double min = d[0];
+		for (int i = 1; i < d.length; i++) {
+			if (d[i] < min) {
+				min = d[i];
+				minIndex = i;
+			}
+		}
+
+		return minIndex;
+	}
+
+	public static void computeKmeans(double[] centers, double[] tmp,
+			int[] tagArr, double[][] distance, int k) {
+		
+		//��ӡÿһ�ε����ƽ�����
+		for(int i=0;i<groupsNum;i++){
+			System.out.print(myformat2.format(centers[i])+ " ");
+		}
+		System.out.println();
+		System.out.println("��" + computeKmeansTimes + "��k-means���");
+		computeKmeansTimes++;
+		for (int i = 0; i < nodesNum; i++) {// k������k����//��i���ڵ�
+			int centerRow = 0;
+			while (centerRow < k) {
+				double dis = 0;
+				dis = Math.pow(tmp[i] - centers[centerRow], 2);
+				distance[i][centerRow] = Math.sqrt(dis);
+				centerRow++;
+			}
+		}// for
+		
+		/*
+		System.out.println("��ӡ���룺");
+	    print(distance,nodesNum,k);*/
+
+		for (int i = 0; i < nodesNum; i++) {
+			int tag = findMinDis(distance[i]);
+			if (tagArr[i] != tag) {
+				tagArr[i] = tag;
+				update = true;
+			}
+		}
+	}
+	public static double[][] constructXMatrix(int[] tagarr){
+		System.out.println();
+		double[][] arrayX = new double[nodesNum][groupsNum];//Ĭ��Ϊȫ0
+		for(int i =0;i<nodesNum;i++){
+			arrayX[i][tagarr[i]] = 1;
+		}
+		for(int i =0;i<nodesNum;i++){
+			for(int j=0;j<groupsNum;j++){
+				System.out.print(myformat.format(arrayX[i][j])+" ");
+			}
+			System.out.println();
+		}
+		return arrayX;
+	}
+	
+	public static double computeQvalue(double[][] arrayX){
+		//double[] Qvalue = new double[groupsNum];
+		int m = edgesNum;
+		Matrix X = new Matrix(arrayX);
+		Matrix XT = X.transpose();
+		Matrix Tmp = XT.times(B);//Tmp = XT*B
+		Tmp = Tmp.times(X);//Tmp = XT*B*X
+		double Q = 1.0/(2*m)*Tmp.trace();//Tmp = 1/(2m)  *  Tr(XT*B*X)
+		System.out.println("Q="+Q);
+		return Q;
+	}
+	
+	public static void output(double[][] arrayX){
+		//String outPutStr = "";
+		for(int j=0;j<groupsNum;j++){
+			String outPutStr = "";
+			System.out.print("group"+j+":");
+			for(int i=0;i<nodesNum;i++){
+				if(arrayX[i][j]>0.0){
+					outPutStr = outPutStr+i+",";
+				}
+			}
+			
+			System.out.println(outPutStr);
+		}
+	}
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		File file = new File(
+				"C:/Users/Yoga/Desktop/��һ�����γ�/�罻ý������/����ҵ/test.txt");
+		double[][] A = readFileToInitializeAdjacentArray(file);
+
+		// print(A);
+		double[] maxEigenVector = computeBMatrixEigenvalues(A);
+
+		//double[] Qvalue = new double[groupsNum];
+		//for(int groupsNum =2;groupsNum<=3;groupsNum++){
+		    int[] tagarr = findSmallGroups(maxEigenVector);
+		    double[][] arrayX = constructXMatrix(tagarr);
+		
+		  //  Qvalue[groupsNum] = computeQvalue(arrayX);
+		    computeQvalue(arrayX);
+		    output(arrayX);
+		//}
+	}
+
+}

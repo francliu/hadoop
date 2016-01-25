@@ -1,0 +1,32 @@
+package my.group.mr;
+
+import com.aliyun.odps.data.Record;
+import com.aliyun.odps.mapred.Mapper;
+
+import java.io.IOException;
+
+/**
+ * Mapper模板。请用真实逻辑替换模板内容
+ */
+public class MyMapper implements Mapper {
+    private Record mapkey;
+    private Record mapvalue;
+
+    public void setup(TaskContext context) throws IOException {
+    	mapkey = context.createMapOutputKeyRecord();
+        mapvalue = context.createMapOutputValueRecord();
+       // one.setBigint(0, 1L);
+    }
+
+    public void map(long recordNum, Record record, TaskContext context) throws IOException {
+        String uid = record.get(0).toString();
+        String mid = record.get(0).toString();
+        mapkey.set(0, uid);
+        // uid,mid,blog_time,blog,fans_id
+        context.write(word, one);
+    }
+
+    public void cleanup(TaskContext context) throws IOException {
+
+    }
+}

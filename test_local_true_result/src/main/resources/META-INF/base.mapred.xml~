@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>test_local_true_result</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.test_local_true_result.JobLauncher</jobLauncher>
+    <mapper>my.group.test_local_true_result.MyMapper</mapper>
+    <reducer>my.group.test_local_true_result.MyReducer</reducer>
+    <combiner>my.group.test_local_true_result.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string,mid:string</mapOutputKey>
+    <mapOutputValue>col1:double,col2:double,col3:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>copy_weibo_blog_data_test</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>source_data_final_result</name>
+    </outputTable>
+</mapred>

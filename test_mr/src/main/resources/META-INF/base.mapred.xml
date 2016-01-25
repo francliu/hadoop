@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>test_mr</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.test_mr.JobLauncher</jobLauncher>
+    <mapper>my.group.test_mr.MyMapper</mapper>
+    <reducer>my.group.test_mr.MyReducer</reducer>
+    <combiner>my.group.test_mr.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string</mapOutputKey>
+    <mapOutputValue>mean_level:double,cnt:double</mapOutputValue>
+
+        <!-- tables -->
+    <inputTables>
+        <table>
+            <name>weibo_blog_last_praise_comment_tranfer</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_user_means_level</name>
+    </outputTable>
+</mapred>

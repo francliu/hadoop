@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>mr_user_feather_last</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.mr_user_feather_last.JobLauncher</jobLauncher>
+    <mapper>my.group.mr_user_feather_last.MyMapper</mapper>
+    <reducer>my.group.mr_user_feather_last.MyReducer</reducer>
+    <combiner>my.group.mr_user_feather_last.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string</mapOutputKey>
+    <mapOutputValue>mid:string,tranfer:double,comment:double,praise:double,max_transfer_num:double,min_transfer_num:double,means_transfer:double,max_comment_num:double,min_comment_num:double,means_comment:double,max_praise_num:double,min_praise_num:double,means_praise:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>weibo_blog_last_praise_comment_tranfer</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_blog_user_feather</name>
+    </outputTable>
+</mapred>
+

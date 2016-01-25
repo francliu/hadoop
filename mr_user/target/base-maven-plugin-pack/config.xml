@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>mr_user</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.mr_user.JobLauncher</jobLauncher>
+    <mapper>my.group.mr_user.MyMapper</mapper>
+    <reducer>my.group.mr_user.MyReducer</reducer>
+    <combiner>my.group.mr_user.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string,mid:string</mapOutputKey>
+    <mapOutputValue>tranfser:double,comment:double,praise:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>weibo_action_copy_data_train</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_blog_last_praise_comment_tranfer</name>
+    </outputTable>
+</mapred>

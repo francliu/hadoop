@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>mr_Predict_result</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.mr_Predict_result.JobLauncher</jobLauncher>
+    <mapper>my.group.mr_Predict_result.MyMapper</mapper>
+    <reducer>my.group.mr_Predict_result.MyReducer</reducer>
+    <combiner>my.group.mr_Predict_result.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string,mid:string</mapOutputKey>
+    <mapOutputValue>action_num:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>submit_temp</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_rd_2_submit</name>
+    </outputTable>
+</mapred>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapred>
+    <!-- profile -->
+    <baseId>95d029e8ba1a94dfcb7a33a1cbb86e31</baseId>
+    <projectId>4182</projectId>
+    <resourceName>mr</resourceName>
+    <idePath>工作流/mr</idePath>
+
+    <!-- classes -->
+    <jobLauncher>my.group.mr.JobLauncher</jobLauncher>
+    <mapper>my.group.mr.MyMapper</mapper>
+    <reducer>my.group.mr.MyReducer</reducer>
+    <combiner>my.group.mr.MyCombiner</combiner>
+
+    <!--task-->
+    <mapOutputKey>uid:string,mid:string,blogtime:string</mapOutputKey>
+    <mapOutputValue>blog:string,blog_len:double</mapOutputValue>
+
+    <!-- tables -->
+    <inputTables>
+        <table>
+            <name>weibo_blog_copy_data_train</name>
+        </table>
+    </inputTables>
+    <outputTable>
+        <name>weibo_blog_content_feather</name>
+    </outputTable>
+</mapred>

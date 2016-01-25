@@ -1,0 +1,106 @@
+
+
+public class KMeans {
+
+	double XX[][];
+	int SCALE; // ά��
+	int N; // ��ĸ���
+	int K; // ��Ҫ��Ϊ���ٸ���
+	int INDEX[];// ��ʼ����������Щ��
+
+	KMeans(double a[][], int s, int n, int k) {
+		XX = a;
+		SCALE = s;
+		N = n;
+		K = k;
+		INDEX=new int[k];
+		for(int i=0;i<k;i++)
+			INDEX[i]=i*(n/k);
+	}
+
+	String[] cluster() {
+
+		int classes[][] = new int[K][N];
+		for (int i = 0; i < K; i++)
+			for (int j = 0; j < N; j++)
+				classes[i][j] = 0;
+		double meanX[][] = new double[K][SCALE];
+		double newMeanX[][] = new double[K][SCALE];
+		int iindex[] = new int[K];
+		for (int i = 0; i < K; i++)
+			iindex[i] = 0;
+		for (int i = 0; i < K; i++) {
+			for (int j = 0; j < SCALE; j++) {
+				meanX[i][j] = XX[INDEX[i]][j];
+			}
+		}
+		boolean is_Ter = false;
+		while (!is_Ter) {
+			for (int i = 0; i < N; i++) {
+				double tmpSum = 0.0;
+				for (int s = 0; s < SCALE; s++) {
+					tmpSum += (XX[i][s] - meanX[0][s])
+							* (XX[i][s] - meanX[0][s]);
+				}
+				double min = Math.sqrt(tmpSum);
+				int minIndex = 0;
+				for (int j = 1; j < K; j++) {
+					tmpSum = 0.0;
+					for (int s = 0; s < SCALE; s++) {
+						tmpSum += (XX[i][s] - meanX[j][s])
+								* (XX[i][s] - meanX[j][s]);
+					}
+					double tmpDis = Math.sqrt(tmpSum);
+					if (tmpDis < min) {
+						min = tmpDis;
+						minIndex = j;
+					}
+				}
+				//System.out.println(iindex[minIndex]);
+				classes[minIndex][iindex[minIndex]++] = i;
+			}
+			int ii;
+			for (ii = 0; ii < K; ii++) {
+				double sum[] = new double[SCALE];
+				for (int m = 0; m < SCALE; m++)
+					sum[m] = 0;
+				for (int j = 0; j < iindex[ii]; j++) {
+					for (int s = 0; s < SCALE; s++)
+						sum[s] += XX[classes[ii][j]][s];
+				}
+				for (int s = 0; s < SCALE; s++) {
+					newMeanX[ii][s] = sum[s] / iindex[ii];
+					if (newMeanX[ii][s] != meanX[ii][s])
+						break;
+				}
+			}
+			if (ii == K) {
+				is_Ter = true;
+			} else // ���û�з��ֶ�����ȣ������¼����µľ��������Լ��µ�K����ĵ�һ����
+			{
+				for (int k = 0; k < K; k++) {
+					iindex[k] = 0;
+					for (int s = 0; s < SCALE; s++)
+						meanX[k][s] = newMeanX[k][s];
+				}
+			}
+		}
+
+		String result[]=new String[K];
+		
+		for (int i = 1; i <= K; i++) {
+
+			String t="";
+			System.out.println("Community " + i + ":");
+			t=classes[i - 1][0]+" ";
+			System.out.print(classes[i - 1][0]);
+			for (int j = 1; j < iindex[i - 1]; j++){
+				System.out.print(" " + classes[i - 1][j]);
+				t=t+classes[i - 1][j]+" ";
+			}
+			System.out.println();
+			result[i-1]=t.substring(0, t.length()-1);
+		}
+		return result;
+	}
+}
